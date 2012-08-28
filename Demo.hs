@@ -25,16 +25,23 @@ data State = State
   , hover    :: Maybe Int
   }
 
-main = getArgs >>= run
+main :: IO ()
+main = do
+  args <- getArgs
 
-run args = do
-  dotText <- L.readFile $ head args
+  if length args == 1 then run $ head args else error "Usage: Demo file.dot"
+
+run :: String -> IO ()
+run file = do
+  dotText <- L.readFile file
   let dg = parseDotGraph dotText :: DotGraph Int
+
   xDotText <- graphvizWithHandle Dot dg XDot hGetContents
   let xdg = fromCanonical (parseDotGraph $ B.fromChunks [xDotText] :: DotGraph Int)
-  let objects = (getOperations xdg, getSize xdg)
 
-  state <- newIORef $ State objects [] (0,0) Nothing
+  let objs = (getOperations xdg, getSize xdg)
+
+  state <- newIORef $ State objs [] (0,0) Nothing
 
   initGUI
   window <- windowNew
@@ -55,42 +62,45 @@ run args = do
 
   onButtonPress canvas $ \e -> do
     when (E.eventButton e == LeftButton && E.eventClick e == SingleClick) $
-      click canvas state dg
+      click state dg
     return True
 
   widgetShowAll window
   onDestroy window mainQuit
   mainGUI
 
-click canvas state dg = do
+click :: IORef State -> DotGraph Int -> IO ()
+click state dg = do
   s <- readIORef state
 
   case hover s of
     Just t ->
-      putStrLn $ (show (nodeStmts $ graphStatements dg) !! t) ++ " clicked"
+      putStrLn $ show (nodeStmts (graphStatements dg) !! t) ++ " clicked"
     _ -> return ()
 
+tick :: WidgetClass w => w -> IORef State -> IO ()
 tick canvas state = do
-  s <- readIORef state
-  let oldHover = hover s
+  oldS <- readIORef state
+  let oldHover = hover oldS
 
-  modifyIORef state $ \s -> (
-    let (mx, my) = mousePos s
-        check (name, (x,y,w,h)) =
+  modifyIORef state $ \s' -> (
+    let (mx, my) = mousePos s'
+        check (name', (x,y,w,h)) =
           if x <= mx && mx <= x + w &&
              y <= my && my <= y + h
-          then Just name else Nothing
-    in s {hover = msum $ map check (bounds s)}
+          then Just name' else Nothing
+    in s' {hover = msum $ map check (bounds s')}
     )
 
   s <- readIORef state
   unless (oldHover == hover s) $ widgetQueueDraw canvas
 
+redraw :: WidgetClass w => w -> IORef State -> IO ()
 redraw canvas state = do
   s <- readIORef state
-  E.Rectangle rx ry rw rh <- widgetGetAllocation canvas
+  E.Rectangle _ _ rw rh <- widgetGetAllocation canvas
 
-  let (ops, size@(sx,sy,sw,sh)) = objects s
+  let (ops, size'@(_,_,sw,sh)) = objects s
 
   boundingBoxes <- render canvas $ do
     -- Proportional scaling
@@ -102,13 +112,14 @@ redraw canvas state = do
     translate offsetx offsety
     scale scalex scaley
 
-    result <- drawAll (hover s) size ops
+    result <- drawAll (hover s) size' ops
 
     restore
     return $ map (\(o, (x,y,w,h)) -> (o, (x*scalex+offsetx,y*scaley+offsety,w*scalex,h*scaley))) result
 
-  modifyIORef state (\s -> s {bounds = boundingBoxes})
+  modifyIORef state (\s' -> s' {bounds = boundingBoxes})
 
+render :: WidgetClass w => w -> Render b -> IO b
 render canvas r = do
     win <- widgetGetDrawWindow canvas
     renderWithDrawable win r
