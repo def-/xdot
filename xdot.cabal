@@ -9,13 +9,10 @@ author:             Dennis Felsing <dennis@felsin9.de>
 maintainer:         Dennis Felsing <dennis@felsin9.de>
 copyright:          Dennis Felsing 2012
 synopsis:           Parse Graphviz xdot files and interactively view them using GTK and Cairo
-description: {
-Parse Graphviz xdot files and interactively view them using GTK and Cairo
-
-Currently only nodes can be highlighted by hovering them and clicked.
-
-For an example of using this library see the accompanying @Demo.hs@
-}
+description:        Parse Graphviz xdot files and interactively view them using
+                    GTK and Cairo. Currently only nodes can be highlighted by
+                    hovering them and clicked. For an example of using this
+                    library see the accompanying Demo.hs
 
 Extra-source-files: Demo.hs
 Library
