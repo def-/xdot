@@ -103,10 +103,11 @@ getOperations (G.DotGraph _ _ _ graphStatements) = F.foldr handle [] graphStatem
 -- | Extract the dimensions of the graph when drawn.
 getSize :: G.DotGraph a -> Rectangle
 getSize (G.DotGraph _ _ _ graphStatements) = F.foldr handle (0,0,0,0) graphStatements
-  where handle (G.GA (GraphAttrs attrs)) _ = foldr handleInternal (0,0,0,0) attrs
+  where handle (G.GA (GraphAttrs attrs)) l = if l /= (0,0,0,0) then l else r
+          where r = foldr handleInternal (0,0,0,0) attrs
         handle _ l = l
 
-        handleInternal (A.BoundingBox (A.Rect (A.Point x y _ _) (A.Point w h _ _))) _ = (x,y,w,h)
+        handleInternal (A.BoundingBox (A.Rect (A.Point x y _ _) (A.Point w h _ _))) r = if r /= (0,0,0,0) then r else (x,y,w,h)
         handleInternal _ l = l
 
 parse :: B.Text -> [Operation]

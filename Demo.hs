@@ -76,7 +76,6 @@ click state dg = do
   case hover s of
     Just t ->
       putStrLn $ t ++ " clicked"
-      --putStrLn $ show (nodeStmts (graphStatements dg) !! t) ++ " clicked"
     _ -> return ()
 
 tick :: WidgetClass w => w -> IORef State -> IO ()
