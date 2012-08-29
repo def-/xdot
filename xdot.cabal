@@ -10,11 +10,12 @@ maintainer:         Dennis Felsing <dennis@felsin9.de>
 copyright:          Dennis Felsing 2012
 synopsis:           Parse Graphviz xdot files and interactively view them using GTK and Cairo
 description:        Parse Graphviz xdot files and interactively view them using
-                    GTK and Cairo. Currently only nodes can be highlighted by
-                    hovering them and clicked. For an example of using this
-                    library see the accompanying Demo.hs
+                    GTK and Cairo. Currently not all xdot features are
+                    supported and only nodes can be highlighted by hovering
+                    them and clicked. For an example of using this library try
+                    the accompanying @Demo.hs@ with the dot-files in @dot-examples/@.
 
-Extra-source-files: Demo.hs
+Extra-source-files: Demo.hs, dot-examples/*.dot
 Library
   Exposed-modules: Graphics.XDot.Parser Graphics.XDot.Viewer Graphics.XDot.Types
   Default-Language: Haskell2010
