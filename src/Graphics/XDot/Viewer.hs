@@ -91,7 +91,7 @@ draw hover (mn, Ellipse (x,y) w h filled) = do
 draw hover (mn, Polygon ((x,y):xys) filled) = do
   stylizedDraw filled hover mn $ do
     moveTo x y
-    mapM (uncurry lineTo) xys
+    mapM_ (uncurry lineTo) xys
     closePath
 
   let xs = x : map fst xys
@@ -171,7 +171,9 @@ draw _ (_, Text (x,y) alignment w text) = do
     return []
 
 draw _ (_, Color color filled) = do
-  setCorrectColor filled color
+  modify (\s -> if filled
+    then s{filledColor = color}
+    else s{strokeColor = color})
   return []
 
 draw _ (_, Font size name) = do
@@ -190,8 +192,3 @@ draw _ (_, Image{}) = return [] -- TODO
 
 getCorrectColor :: Bool -> DrawState RGBA
 getCorrectColor filled = gets $ if filled then filledColor else strokeColor
-
-setCorrectColor :: Bool -> RGBA -> DrawState ()
-setCorrectColor filled color = modify (\s -> if filled
-  then s{filledColor = color}
-  else s{strokeColor = color})

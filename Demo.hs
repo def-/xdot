@@ -9,6 +9,7 @@ import qualified Data.Text.Lazy.IO as L
 import qualified Data.Text.Lazy as B
 
 import Data.GraphViz
+import qualified Data.GraphViz.Types.Generalised as G
 
 import Graphics.XDot.Parser
 import Graphics.XDot.Viewer
@@ -34,10 +35,11 @@ main = do
 run :: String -> IO ()
 run file = do
   dotText <- L.readFile file
-  let dg = parseDotGraph dotText :: DotGraph String
+  let dg = parseDotGraph dotText :: G.DotGraph String
 
+  -- You can choose another graphviz command by changing Dot to Neato, TwoPi, Circo or Fdp
   xDotText <- graphvizWithHandle Dot dg XDot hGetContents
-  let xdg = fromCanonical (parseDotGraph $ B.fromChunks [xDotText] :: DotGraph String)
+  let xdg = parseDotGraph $ B.fromChunks [xDotText] :: G.DotGraph String
 
   let objs = (getOperations xdg, getSize xdg)
 
@@ -69,7 +71,7 @@ run file = do
   onDestroy window mainQuit
   mainGUI
 
-click :: IORef State -> DotGraph String -> IO ()
+click :: IORef State -> G.DotGraph String -> IO ()
 click state dg = do
   s <- readIORef state
 

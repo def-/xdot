@@ -87,18 +87,23 @@ import Graphics.XDot.Types hiding (w, h, filled, baseline, width, alignment, siz
 --   belong to, if any.
 getOperations :: G.DotGraph a -> [(Maybe a, Operation)]
 getOperations (G.DotGraph _ _ _ graphStatements) = F.foldr handle [] graphStatements
-  where handle (G.GA (GraphAttrs attrs)) l = zip (repeat Nothing) (foldr handleInternal [] attrs) ++ l
-        handle (G.DN (DotNode ident attrs)) l = zip (repeat $ Just ident) (foldr handleInternal [] attrs) ++ l
-        handle (G.DE (DotEdge _ _ attrs)) l = zip (repeat Nothing) (foldr handleInternal [] attrs) ++ l
+  where handle (G.GA (GraphAttrs attrs)) l = zip (repeat Nothing) (handleInternal attrs) ++ l
+        handle (G.DN (DotNode ident attrs)) l = zip (repeat $ Just ident) (handleInternal attrs) ++ l
+        -- TODO: Add edge identifiers
+        handle (G.DE (DotEdge _ _ attrs)) l = zip (repeat Nothing) (handleInternal attrs) ++ l
         handle _ l = l
 
-        handleInternal (A.UnknownAttribute "_draw_" r) l = parse r ++ l
-        handleInternal (A.UnknownAttribute "_ldraw_" r) l = parse r ++ l
-        handleInternal (A.UnknownAttribute "_hdraw_" r) l = parse r ++ l
-        handleInternal (A.UnknownAttribute "_tdraw_" r) l = parse r ++ l
-        handleInternal (A.UnknownAttribute "_hldraw_" r) l = parse r ++ l
-        handleInternal (A.UnknownAttribute "_tlldraw_" r) l = parse r ++ l
-        handleInternal _ l = l
+        handleInternal attrs = foldr handleFirst [] attrs ++ foldr handleSecond [] attrs
+
+        handleFirst (A.UnknownAttribute "_draw_" r) l = parse r ++ l
+        handleFirst _ l = l
+
+        handleSecond (A.UnknownAttribute "_ldraw_" r) l = parse r ++ l
+        handleSecond (A.UnknownAttribute "_hdraw_" r) l = parse r ++ l
+        handleSecond (A.UnknownAttribute "_tdraw_" r) l = parse r ++ l
+        handleSecond (A.UnknownAttribute "_hldraw_" r) l = parse r ++ l
+        handleSecond (A.UnknownAttribute "_tlldraw_" r) l = parse r ++ l
+        handleSecond _ l = l
 
 -- | Extract the dimensions of the graph when drawn.
 getSize :: G.DotGraph a -> Rectangle
