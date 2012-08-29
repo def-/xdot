@@ -91,6 +91,7 @@ getOperations (G.DotGraph _ _ _ graphStatements) = F.foldr handle [] graphStatem
         handle (G.DN (DotNode ident attrs)) l = zip (repeat $ Just ident) (handleInternal attrs) ++ l
         -- TODO: Add edge identifiers
         handle (G.DE (DotEdge _ _ attrs)) l = zip (repeat Nothing) (handleInternal attrs) ++ l
+        handle (G.SG (G.DotSG _ _ statements)) l = F.foldr handle [] statements ++ l
         handle _ l = l
 
         handleInternal attrs = foldr handleFirst [] attrs ++ foldr handleSecond [] attrs

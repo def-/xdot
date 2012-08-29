@@ -43,6 +43,9 @@ run file = do
 
   let objs = (getOperations xdg, getSize xdg)
 
+  --putStrLn $ show xdg
+  --putStrLn $ show objs
+
   state <- newIORef $ State objs [] (0,0) Nothing
 
   initGUI
