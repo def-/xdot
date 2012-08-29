@@ -19,6 +19,7 @@ Library
   Exposed-modules: Graphics.XDot.Parser Graphics.XDot.Viewer Graphics.XDot.Types
   Default-Language: Haskell2010
   Build-depends: base,
+                 mtl,
                  cairo,
                  gtk,
                  graphviz,

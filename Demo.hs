@@ -19,10 +19,10 @@ import Graphics.Rendering.Cairo
 import qualified Graphics.UI.Gtk.Gdk.Events as E
 
 data State = State
-  { objects  :: ([(Maybe Int, Operation)], Rectangle)
-  , bounds   :: [(Int, Rectangle)]
+  { objects  :: ([(Maybe String, Operation)], Rectangle)
+  , bounds   :: [(String, Rectangle)]
   , mousePos :: Point
-  , hover    :: Maybe Int
+  , hover    :: Maybe String
   }
 
 main :: IO ()
@@ -34,10 +34,10 @@ main = do
 run :: String -> IO ()
 run file = do
   dotText <- L.readFile file
-  let dg = parseDotGraph dotText :: DotGraph Int
+  let dg = parseDotGraph dotText :: DotGraph String
 
   xDotText <- graphvizWithHandle Dot dg XDot hGetContents
-  let xdg = fromCanonical (parseDotGraph $ B.fromChunks [xDotText] :: DotGraph Int)
+  let xdg = fromCanonical (parseDotGraph $ B.fromChunks [xDotText] :: DotGraph String)
 
   let objs = (getOperations xdg, getSize xdg)
 
@@ -69,13 +69,14 @@ run file = do
   onDestroy window mainQuit
   mainGUI
 
-click :: IORef State -> DotGraph Int -> IO ()
+click :: IORef State -> DotGraph String -> IO ()
 click state dg = do
   s <- readIORef state
 
   case hover s of
     Just t ->
-      putStrLn $ show (nodeStmts (graphStatements dg) !! t) ++ " clicked"
+      putStrLn $ t ++ " clicked"
+      --putStrLn $ show (nodeStmts (graphStatements dg) !! t) ++ " clicked"
     _ -> return ()
 
 tick :: WidgetClass w => w -> IORef State -> IO ()
