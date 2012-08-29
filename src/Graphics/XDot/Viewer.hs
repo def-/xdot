@@ -140,8 +140,16 @@ draw _ (_, Text (x,y) alignment w text) = do
 
     liftIO $ layoutContextChanged layout
 
-    font <- liftIO fontDescriptionNew
-    liftIO $ fontDescriptionSetFamily font fontName'
+    -- This does not work with "Times Roman", but it works with a font that is
+    -- installed on the system
+    --font <- liftIO fontDescriptionNew
+    --liftIO $ fontDescriptionSetFamily font "Nimbus Roman No9 L, Regular"
+    --liftIO $ fontDescriptionSetFamily font "Times Roman"
+    --liftIO $ fontDescriptionSetSize font fontSize'
+
+    -- Only fontDescriptionFromString works as expected, choosing a similar
+    -- alternative font when the selected one is not available
+    font <- liftIO $ fontDescriptionFromString fontName'
     liftIO $ fontDescriptionSetSize font fontSize'
     liftIO $ layoutSetFontDescription layout (Just font)
 
@@ -150,8 +158,8 @@ draw _ (_, Text (x,y) alignment w text) = do
     (_, PangoRectangle _ _ w2 h2) <- liftIO $ layoutGetExtents layout
 
     let (f, w3, h3, descent) = if w2 > w
-          then (w / w2, w,  h2 * w / w2, 2 * w / w2)
-          else (1,      w2, h2,          2)
+          then (w / w2, w,  h2 * w / w2, 4 * w / w2)
+          else (1,      w2, h2,          4)
 
     let x3 = case alignment of
                LeftAlign   -> x
@@ -165,9 +173,8 @@ draw _ (_, Text (x,y) alignment w text) = do
 
     showLayout layout
 
-    return ()
-
     restore
+
     return []
 
 draw _ (_, Color color filled) = do
@@ -177,11 +184,17 @@ draw _ (_, Color color filled) = do
   return []
 
 draw _ (_, Font size name) = do
-  modify (\s -> s{fontName = name, fontSize = size})
+  modify (\s -> s{fontName = fixedName, fontSize = size})
   return []
 
+  -- Pango does not like "Times-Roman", but works with "Times Roman".
+  -- Graphviz handles this in plugin/pango/gvtextlayout_pango.c
+  where fixedName = map fixName name
+        fixName '-' = ' '
+        fixName x   = x
+
 draw _ (_, Style x) = do
-  case x of
+  case x of -- TODO: Some styles missing
     "solid"  -> modify (\s -> s{lineStyle = []}) -- always on
     "dashed" -> modify (\s -> s{lineStyle = [6,6]}) -- 6 pts on, 6 pts off
     "dotted" -> modify (\s -> s{lineStyle = [2,4]}) -- 2 pts on, 4 pts off
