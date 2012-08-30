@@ -1,6 +1,5 @@
 {- |
    Module      : Graphics.XDot.Types
-   Description : Representations of xdot parameters.
    Copyright   : (c) Dennis Felsing
    License     : 3-Clause BSD-style
    Maintainer  : dennis@felsin9.de
@@ -37,6 +36,6 @@ data Operation = Ellipse { xy :: Point, w :: Double, h :: Double, filled :: Bool
                | Text { baseline :: Point, alignment :: Alignment, width :: Double, text :: String }
                | Color { rgba :: (Double, Double, Double, Double), filled :: Bool }
                | Font { size :: Double, name :: String }
-               | Style { style :: String }
+               | Style { style :: String } -- TODO: Add type
                | Image { xy :: Point, w :: Double, h :: Double, name :: String }
                deriving Show

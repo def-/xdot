@@ -2,7 +2,6 @@
 
 {- |
    Module      : Graphics.XDot.Parser
-   Description : Parsing xdot graphs to get their operations
    Copyright   : (c) Dennis Felsing
    License     : 3-Clause BSD-style
    Maintainer  : dennis@felsin9.de
@@ -11,7 +10,7 @@
    can be parsed using this module.
 
    > xDotText <- L.readFile "example.xdot"
-   > let xDotGraph = parseDotGraph xDotText :: G.DotGraph Int
+   > let xDotGraph = parseDotGraph xDotText :: G.DotGraph String
    > let operations = getOperations xDotGraph
 
    xdot files can be created using the dot binary from the Graphviz package:
@@ -27,20 +26,20 @@
    Or you can skip saving an xdot file and use a dot file directly:
 
    > $ dotText <- L.readFile "example.dot"
-   > $ let dotGraph = parseDotGraph dotText :: G.DotGraph Int
+   > $ let dotGraph = parseDotGraph dotText :: G.DotGraph String
    > $ xDotText <- graphvizWithHandle Dot dotGraph XDot T.hGetContents
-   > $ let xDotGraph = parseDotGraph $ B.fromChunks [xDotText] :: G.DotGraph Int
+   > $ let xDotGraph = parseDotGraph $ B.fromChunks [xDotText] :: G.DotGraph String
    > $ getOperations xDotGraph
    > [ (Nothing,Color {rgba = (1.0,1.0,1.0,1.0), filled = False})
    > , (Nothing,Color {rgba = (1.0,1.0,1.0,1.0), filled = True})
    > , (Nothing,Polygon {points = [(0.0,-1.0),(0.0,130.0),(55.0,130.0),(55.0,-1.0)], filled = True})
-   > , (Just 0,Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Just 0,Ellipse {xy = (27.0,112.0), w = 27.0, h = 18.0, filled = False})
-   > , (Just 1,Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Just 1,Ellipse {xy = (27.0,19.0), w = 27.0, h = 19.0, filled = False})
-   > , (Just 1,Font {size = 14.0, name = "Times-Roman"})
-   > , (Just 1,Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Just 1,Text {baseline = (27.0,15.0), alignment = CenterAlign, width = 4.0, text = ":"})
+   > , (Just "0",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Just "0",Ellipse {xy = (27.0,112.0), w = 27.0, h = 18.0, filled = False})
+   > , (Just "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Just "1",Ellipse {xy = (27.0,19.0), w = 27.0, h = 19.0, filled = False})
+   > , (Just "1",Font {size = 14.0, name = "Times-Roman"})
+   > , (Just "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Just "1",Text {baseline = (27.0,15.0), alignment = CenterAlign, width = 4.0, text = ":"})
    > , (Nothing,Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
    > , (Nothing,BSpline {points = [(27.0,94.0),(27.0,81.0),(27.0,63.0),(27.0,48.0)], filled = False})
    > , (Nothing,Style {style = "solid"})

@@ -1,6 +1,5 @@
 {- |
    Module      : Graphics.XDot.Viewer
-   Description : View xdot graphs by executing their operations
    Copyright   : (c) Dennis Felsing
    License     : 3-Clause BSD-style
    Maintainer  : dennis@felsin9.de
