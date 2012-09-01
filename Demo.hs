@@ -4,12 +4,13 @@ import System.Environment
 import Control.Monad
 import Data.IORef
 
-import Data.Text.IO hiding (putStrLn)
 import qualified Data.Text.Lazy.IO as L
 import qualified Data.Text.Lazy as B
 
 import Data.GraphViz
 import qualified Data.GraphViz.Types.Generalised as G
+import Data.GraphViz.Commands
+import Data.GraphViz.Commands.IO
 
 import Graphics.XDot.Parser
 import Graphics.XDot.Viewer
@@ -29,7 +30,7 @@ data State = State
 main :: IO ()
 main = do
   args <- getArgs
-
+  quitWithoutGraphviz "Cannot continue: Graphviz is not installed"
   if length args == 1 then run $ head args else error "Usage: Demo file.dot"
 
 run :: String -> IO ()
@@ -38,8 +39,7 @@ run file = do
   let dg = parseDotGraph dotText :: G.DotGraph String
 
   -- You can choose another graphviz command by changing Dot to Neato, TwoPi, Circo or Fdp
-  xDotText <- graphvizWithHandle Dot dg XDot hGetContents
-  let xdg = parseDotGraph $ B.fromChunks [xDotText] :: G.DotGraph String
+  xdg <- graphvizWithHandle Dot dg XDot hGetDot
 
   let objs = (getOperations xdg, getSize xdg)
 

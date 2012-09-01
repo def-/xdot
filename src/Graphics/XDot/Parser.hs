@@ -27,8 +27,7 @@
 
    > $ dotText <- L.readFile "example.dot"
    > $ let dotGraph = parseDotGraph dotText :: G.DotGraph String
-   > $ xDotText <- graphvizWithHandle Dot dotGraph XDot T.hGetContents
-   > $ let xDotGraph = parseDotGraph $ B.fromChunks [xDotText] :: G.DotGraph String
+   > $ xDotGraph <- graphvizWithHandle Dot dotGraph XDot hGetDot :: IO (G.DotGraph String)
    > $ getOperations xDotGraph
    > [ (Nothing,Color {rgba = (1.0,1.0,1.0,1.0), filled = False})
    > , (Nothing,Color {rgba = (1.0,1.0,1.0,1.0), filled = True})
@@ -54,8 +53,7 @@
    The following imports are needed for this:
 
    > import Data.GraphViz
-   > import Data.Text.IO as T
-   > import qualified Data.Text.Lazy as B
+   > import Data.GraphViz.Commands.IO
    > import qualified Data.Text.Lazy.IO as L
    > import qualified Data.GraphViz.Types.Generalised as G
  -}
