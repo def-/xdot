@@ -12,8 +12,8 @@ synopsis:           Parse Graphviz xdot files and interactively view them using 
 description:        Parse Graphviz xdot files and interactively view them using
                     GTK and Cairo.
                     .
-                    Currently not all xdot features are supported and only
-                    nodes can be highlighted by hovering them and clicked.
+                    Currently not all xdot features are supported. Nodes and
+                    edges can be highlighted by hovering them and clicked.
                     .
                     For an example of using this library try the accompanying
                     @Demo.hs@ with the dot-files in @dot-examples/@.

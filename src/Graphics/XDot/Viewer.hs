@@ -12,11 +12,9 @@ module Graphics.XDot.Viewer (
 )
 where
 
-import Data.Maybe
-
 import Graphics.XDot.Types hiding (w, h, filled, alignment, text, name, size)
 
-import Graphics.UI.Gtk hiding (Color, Rectangle, descent)
+import Graphics.UI.Gtk hiding (Color, Rectangle, descent, Object)
 import Graphics.Rendering.Cairo
 
 import Control.Monad.State hiding (State)
@@ -36,10 +34,10 @@ type DrawState a = MS.StateT DState Render a
 
 -- | Draw an xdot graph, possibly highlighting a node.
 drawAll :: Eq t => 
-     Maybe t -- ^ id of the node to highlight
+     Object t -- ^ id of the node to highlight
   -> Rectangle -- ^ dimensions of the graph, as returned by 'Graphics.XDot.Parser.getSize'
-  -> [(Maybe t, Operation)] -- ^ operations, as returned by 'Graphics.XDot.Parser.getOperations'
-  -> Render [(t, Rectangle)] -- ^ dimensions of the rendered nodes on the screen
+  -> [(Object t, Operation)] -- ^ operations, as returned by 'Graphics.XDot.Parser.getOperations'
+  -> Render [(Object t, Rectangle)] -- ^ dimensions of the rendered nodes on the screen
 drawAll hover (_,_,sw,sh) ops = do
   let scalex = 1
       scaley = -1
@@ -56,14 +54,14 @@ drawAll hover (_,_,sw,sh) ops = do
     $ map (\(o, (x,y,w,h)) -> (o, (x*scalex+offsetx,y*scaley+offsety,w,h)))
     $ concat boundingBoxes
 
-stylizedDraw :: Eq t => Bool -> Maybe t -> Maybe t -> Render a -> DrawState ()
+stylizedDraw :: Eq t => Bool -> Object t -> Object t -> Render a -> DrawState ()
 stylizedDraw filled mn hover renderOps = do
   (r,g,b,a) <- getCorrectColor filled
   lWidth <- gets lineWidth
   lStyle <- gets lineStyle
 
   lift $ do
-    if isJust mn && mn == hover
+    if mn /= None && mn == hover
       then if filled then setSourceRGBA 1 0 0 0.3 else setSourceRGBA 1 0 0 1
       else setSourceRGBA r g b a
     setLineWidth lWidth
@@ -75,7 +73,7 @@ stylizedDraw filled mn hover renderOps = do
 
     if filled then fillPreserve >> fill else stroke
 
-draw :: Eq t => Maybe t -> (Maybe t, Operation) -> DrawState [(t, Rectangle)]
+draw :: Eq t => Object t -> (Object t, Operation) -> DrawState [(Object t, Rectangle)]
 draw hover (mn, Ellipse (x,y) w h filled) = do
   stylizedDraw filled hover mn $ do
     translate x y
@@ -84,8 +82,8 @@ draw hover (mn, Ellipse (x,y) w h filled) = do
     arc 0 0 1 0 (2 * pi)
 
   return $ case mn of
-    Just node -> [(node, (x - w, y + h, 2 * w, 2 * h))]
-    Nothing   -> []
+    None -> []
+    o -> [(o, (x - w, y + h, 2 * w, 2 * h))]
 
 draw hover (mn, Polygon ((x,y):xys) filled) = do
   stylizedDraw filled hover mn $ do
@@ -97,8 +95,8 @@ draw hover (mn, Polygon ((x,y):xys) filled) = do
   let ys = y : map snd xys
 
   return $ case mn of
-    Just node -> [(node, (minimum xs, maximum ys, maximum xs - minimum xs, maximum ys - minimum ys))]
-    Nothing   -> []
+    None -> []
+    o -> [(o, (minimum xs, maximum ys, maximum xs - minimum xs, maximum ys - minimum ys))]
 
 draw _ (_, Polygon [] _) = return []
 
@@ -109,13 +107,17 @@ draw hover (mn, BSpline ((x,y):xys) filled) = do
     moveTo x y
     drawBezier xys
 
-  return []
+  return $ case mn of
+    None -> []
+    o -> [ (o, (x  - 10, y  + 10, 20, 20))
+         , (o, (xe - 10, ye + 10, 20, 20))
+         ]
 
   where drawBezier ((x1,y1):(x2,y2):(x3,y3):xys2) = do
           curveTo x1 y1 x2 y2 x3 y3
           drawBezier xys2
         drawBezier _ = return ()
-
+        (xe,ye) = last xys
 
 draw _ (_, BSpline [] _) = return []
 
@@ -168,8 +170,8 @@ draw hover (mn, Text (x,y) alignment w text) = do
     showLayout layout
 
   return $ case mn of
-    Just node -> [(node, (x3, y3, w3, h3))]
-    Nothing   -> []
+    None -> []
+    o -> [(o, (x3, y3, w3, h3))]
 
 draw _ (_, Color color filled) = do
   modify (\s -> if filled

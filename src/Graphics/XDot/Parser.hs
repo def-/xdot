@@ -29,25 +29,25 @@
    > $ let dotGraph = parseDotGraph dotText :: G.DotGraph String
    > $ xDotGraph <- graphvizWithHandle Dot dotGraph XDot hGetDot :: IO (G.DotGraph String)
    > $ getOperations xDotGraph
-   > [ (Nothing,Color {rgba = (1.0,1.0,1.0,1.0), filled = False})
-   > , (Nothing,Color {rgba = (1.0,1.0,1.0,1.0), filled = True})
-   > , (Nothing,Polygon {points = [(0.0,-1.0),(0.0,130.0),(55.0,130.0),(55.0,-1.0)], filled = True})
-   > , (Just "0",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Just "0",Ellipse {xy = (27.0,112.0), w = 27.0, h = 18.0, filled = False})
-   > , (Just "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Just "1",Ellipse {xy = (27.0,19.0), w = 27.0, h = 19.0, filled = False})
-   > , (Just "1",Font {size = 14.0, name = "Times-Roman"})
-   > , (Just "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Just "1",Text {baseline = (27.0,15.0), alignment = CenterAlign, width = 4.0, text = ":"})
-   > , (Nothing,Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Nothing,BSpline {points = [(27.0,94.0),(27.0,81.0),(27.0,63.0),(27.0,48.0)], filled = False})
-   > , (Nothing,Style {style = "solid"})
-   > , (Nothing,Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Nothing,Color {rgba = (0.0,0.0,0.0,1.0), filled = True})
-   > , (Nothing,Polygon {points = [(31.0,48.0),(27.0,38.0),(24.0,48.0)], filled = True})
-   > , (Nothing,Font {size = 14.0, name = "Times-Roman"})
-   > , (Nothing,Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
-   > , (Nothing,Text {baseline = (39.0,62.0), alignment = CenterAlign, width = 24.0, text = "[1..]"})
+   > [ (None,Color {rgba = (1.0,1.0,1.0,1.0), filled = False})
+   > , (None,Color {rgba = (1.0,1.0,1.0,1.0), filled = True})
+   > , (None,Polygon {points = [(0.0,-1.0),(0.0,130.0),(55.0,130.0),(55.0,-1.0)], filled = True})
+   > , (Node "0",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Node "0",Ellipse {xy = (27.0,112.0), w = 27.0, h = 18.0, filled = False})
+   > , (Node "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Node "1",Ellipse {xy = (27.0,19.0), w = 27.0, h = 19.0, filled = False})
+   > , (Node "1",Font {size = 14.0, name = "Times-Roman"})
+   > , (Node "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Node "1",Text {baseline = (27.0,15.0), alignment = CenterAlign, width = 4.0, text = ":"})
+   > , (Edge "0" "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Edge "0" "1",BSpline {points = [(27.0,94.0),(27.0,81.0),(27.0,63.0),(27.0,48.0)], filled = False})
+   > , (Edge "0" "1",Style {style = "solid"})
+   > , (Edge "0" "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Edge "0" "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = True})
+   > , (Edge "0" "1",Polygon {points = [(31.0,48.0),(27.0,38.0),(24.0,48.0)], filled = True})
+   > , (Edge "0" "1",Font {size = 14.0, name = "Times-Roman"})
+   > , (Edge "0" "1",Color {rgba = (0.0,0.0,0.0,1.0), filled = False})
+   > , (Edge "0" "1",Text {baseline = (39.0,62.0), alignment = CenterAlign, width = 24.0, text = "[1..]"})
    > ]
 
    The following imports are needed for this:
@@ -82,12 +82,12 @@ import Graphics.XDot.Types hiding (w, h, filled, baseline, width, alignment, siz
 
 -- | Extract all operations of an xdot graph and connect them to the node they
 --   belong to, if any.
-getOperations :: G.DotGraph a -> [(Maybe a, Operation)]
+getOperations :: G.DotGraph a -> [(Object a, Operation)]
 getOperations (G.DotGraph _ _ _ graphStatements) = F.foldr handle [] graphStatements
-  where handle (G.GA (GraphAttrs attrs)) l = zip (repeat Nothing) (handleInternal attrs) ++ l
-        handle (G.DN (DotNode ident attrs)) l = zip (repeat $ Just ident) (handleInternal attrs) ++ l
+  where handle (G.GA (GraphAttrs attrs)) l = zip (repeat None) (handleInternal attrs) ++ l
+        handle (G.DN (DotNode ident attrs)) l = zip (repeat $ Node ident) (handleInternal attrs) ++ l
         -- TODO: Add edge identifiers
-        handle (G.DE (DotEdge _ _ attrs)) l = zip (repeat Nothing) (handleInternal attrs) ++ l
+        handle (G.DE (DotEdge from to attrs)) l = zip (repeat $ Edge from to) (handleInternal attrs) ++ l
         handle (G.SG (G.DotSG _ _ statements)) l = F.foldr handle [] statements ++ l
         handle _ l = l
 

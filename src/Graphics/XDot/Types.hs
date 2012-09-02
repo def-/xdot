@@ -10,6 +10,7 @@ module Graphics.XDot.Types (
   Point,
   Rectangle,
   Alignment(..),
+  Object(..),
   Operation(..)
   )
   where
@@ -25,6 +26,12 @@ data Alignment = LeftAlign
                | CenterAlign
                | RightAlign
                deriving Show
+
+-- | An object an operation can belong to.
+data Object n = None
+              | Node n
+              | Edge n n
+              deriving (Show, Eq)
 
 -- | Drawing operations supported by xdot. See
 --   <http://www.graphviz.org/doc/info/output.html#d:xdot> for more information

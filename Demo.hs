@@ -5,26 +5,24 @@ import Control.Monad
 import Data.IORef
 
 import qualified Data.Text.Lazy.IO as L
-import qualified Data.Text.Lazy as B
 
 import Data.GraphViz
 import qualified Data.GraphViz.Types.Generalised as G
-import Data.GraphViz.Commands
 import Data.GraphViz.Commands.IO
 
 import Graphics.XDot.Parser
 import Graphics.XDot.Viewer
 import Graphics.XDot.Types hiding (w, h)
 
-import Graphics.UI.Gtk hiding (Box, Signal, Dot, Point, Rectangle)
+import Graphics.UI.Gtk hiding (Box, Signal, Dot, Point, Rectangle, Object)
 import Graphics.Rendering.Cairo
 import qualified Graphics.UI.Gtk.Gdk.Events as E
 
 data State = State
-  { objects  :: ([(Maybe String, Operation)], Rectangle)
-  , bounds   :: [(String, Rectangle)]
+  { objects  :: ([(Object String, Operation)], Rectangle)
+  , bounds   :: [(Object String, Rectangle)]
   , mousePos :: Point
-  , hover    :: Maybe String
+  , hover    :: Object String
   }
 
 main :: IO ()
@@ -46,7 +44,7 @@ run file = do
   --putStrLn $ show xdg
   --putStrLn $ show objs
 
-  state <- newIORef $ State objs [] (0,0) Nothing
+  state <- newIORef $ State objs [] (0,0) None
 
   initGUI
   window <- windowNew
@@ -75,12 +73,12 @@ run file = do
   mainGUI
 
 click :: IORef State -> G.DotGraph String -> IO ()
-click state dg = do
+click state _dg = do
   s <- readIORef state
 
   case hover s of
-    Just t ->
-      putStrLn $ t ++ " clicked"
+    Node t -> putStrLn $ "Node clicked: " ++ t
+    Edge f t -> putStrLn $ "Edge clicked: " ++ f ++ " -> " ++ t
     _ -> return ()
 
 tick :: WidgetClass w => w -> IORef State -> IO ()
@@ -93,8 +91,12 @@ tick canvas state = do
         check (name', (x,y,w,h)) =
           if x <= mx && mx <= x + w &&
              y <= my && my <= y + h
-          then Just name' else Nothing
-    in s' {hover = msum $ map check (bounds s')}
+          then name' else None
+
+        validOne (None:xs) = validOne xs
+        validOne (x:_) = x
+        validOne _ = None
+    in s' {hover = validOne $ map check (bounds s')}
     )
 
   s <- readIORef state
