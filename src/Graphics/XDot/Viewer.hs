@@ -64,7 +64,7 @@ stylizedDraw filled mn hover renderOps = do
 
   lift $ do
     if isJust mn && mn == hover
-      then setSourceRGBA 1 0 0 1
+      then if filled then setSourceRGBA 1 0 0 0.3 else setSourceRGBA 1 0 0 1
       else setSourceRGBA r g b a
     setLineWidth lWidth
     setDash lStyle 0
@@ -119,62 +119,57 @@ draw hover (mn, BSpline ((x,y):xys) filled) = do
 
 draw _ (_, BSpline [] _) = return []
 
-draw _ (_, Text (x,y) alignment w text) = do
-  (r,g,b,a) <- getCorrectColor False -- stroke, not filled
+draw hover (mn, Text (x,y) alignment w text) = do
   fontName' <- gets fontName
   fontSize' <- gets fontSize
 
-  lift $ do
-    setSourceRGBA r g b a
+  layout <- lift $ createLayout "text"
+  context <- liftIO $ layoutGetContext layout
 
-    layout <- createLayout "text"
-    context <- liftIO $ layoutGetContext layout
+  fo <- liftIO $ cairoContextGetFontOptions context
 
-    fo <- liftIO $ cairoContextGetFontOptions context
+  fontOptionsSetAntialias fo AntialiasDefault
+  fontOptionsSetHintStyle fo HintStyleNone
+  fontOptionsSetHintMetrics fo HintMetricsOff
+  liftIO $ cairoContextSetFontOptions context fo
 
-    fontOptionsSetAntialias fo AntialiasDefault
-    fontOptionsSetHintStyle fo HintStyleNone
-    fontOptionsSetHintMetrics fo HintMetricsOff
-    liftIO $ cairoContextSetFontOptions context fo
+  liftIO $ layoutContextChanged layout
 
-    liftIO $ layoutContextChanged layout
+  -- This does not work with "Times Roman", but it works with a font that is
+  -- installed on the system
+  --font <- liftIO fontDescriptionNew
+  --liftIO $ fontDescriptionSetFamily font "Nimbus Roman No9 L, Regular"
+  --liftIO $ fontDescriptionSetFamily font "Times Roman"
+  --liftIO $ fontDescriptionSetSize font fontSize'
 
-    -- This does not work with "Times Roman", but it works with a font that is
-    -- installed on the system
-    --font <- liftIO fontDescriptionNew
-    --liftIO $ fontDescriptionSetFamily font "Nimbus Roman No9 L, Regular"
-    --liftIO $ fontDescriptionSetFamily font "Times Roman"
-    --liftIO $ fontDescriptionSetSize font fontSize'
+  -- Only fontDescriptionFromString works as expected, choosing a similar
+  -- alternative font when the selected one is not available
+  font <- liftIO $ fontDescriptionFromString fontName'
+  liftIO $ fontDescriptionSetSize font fontSize'
+  liftIO $ layoutSetFontDescription layout (Just font)
 
-    -- Only fontDescriptionFromString works as expected, choosing a similar
-    -- alternative font when the selected one is not available
-    font <- liftIO $ fontDescriptionFromString fontName'
-    liftIO $ fontDescriptionSetSize font fontSize'
-    liftIO $ layoutSetFontDescription layout (Just font)
+  liftIO $ layoutSetText layout text
 
-    liftIO $ layoutSetText layout text
+  (_, PangoRectangle _ _ w2 h2) <- liftIO $ layoutGetExtents layout
 
-    (_, PangoRectangle _ _ w2 h2) <- liftIO $ layoutGetExtents layout
+  let (f, w3, h3, descent) = if w2 > w
+        then (w / w2, w,  h2 * w / w2, 4 * w / w2)
+        else (1,      w2, h2,          4)
 
-    let (f, w3, h3, descent) = if w2 > w
-          then (w / w2, w,  h2 * w / w2, 4 * w / w2)
-          else (1,      w2, h2,          4)
+  let x3 = case alignment of
+             LeftAlign   -> x
+             CenterAlign -> x - 0.5 * w3
+             RightAlign  -> x -       w3
+      y3 = y + h3 - descent
 
-    let x3 = case alignment of
-               LeftAlign   -> x
-               CenterAlign -> x - 0.5 * w3
-               RightAlign  -> x -       w3
-        y3 = y + h3 - descent
-
+  stylizedDraw False hover mn $ do
     moveTo x3 y3
-    save
     scale f (-f)
-
     showLayout layout
 
-    restore
-
-    return []
+  return $ case mn of
+    Just node -> [(node, (x3, y3, w3, h3))]
+    Nothing   -> []
 
 draw _ (_, Color color filled) = do
   modify (\s -> if filled
