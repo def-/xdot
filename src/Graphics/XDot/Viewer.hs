@@ -125,7 +125,7 @@ draw hover (mn, Text (x,y) alignment w text) = do
   fontName' <- gets fontName
   fontSize' <- gets fontSize
 
-  layout <- lift $ createLayout "text"
+  layout <- lift $ createLayout text
   context <- liftIO $ layoutGetContext layout
 
   fo <- liftIO $ cairoContextGetFontOptions context
@@ -149,8 +149,6 @@ draw hover (mn, Text (x,y) alignment w text) = do
   font <- liftIO $ fontDescriptionFromString fontName'
   liftIO $ fontDescriptionSetSize font fontSize'
   liftIO $ layoutSetFontDescription layout (Just font)
-
-  liftIO $ layoutSetText layout text
 
   (_, PangoRectangle _ _ w2 h2) <- liftIO $ layoutGetExtents layout
 
