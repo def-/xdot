@@ -66,8 +66,6 @@ stylizedDraw filled mn hover renderOps = do
       if mn /= None && mn == hover
         then setSourceRGBA 1 0.8 0.8 1
         else setSourceRGBA rf gf bf af
-      setLineWidth lWidth
-      setDash lStyle 0
 
       save
       renderOps
@@ -76,13 +74,17 @@ stylizedDraw filled mn hover renderOps = do
       fillPreserve
       fill
 
-    save
-    renderOps
-    restore
+    setLineWidth lWidth
+    setDash lStyle 0
 
     if mn /= None && mn == hover
       then setSourceRGBA 1 0 0 1
       else setSourceRGBA rs gs bs as
+
+    save
+    renderOps
+    restore
+
     stroke
 
 draw :: Eq t => Object t -> (Object t, Operation) -> DrawState [(Object t, Rectangle)]
