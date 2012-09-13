@@ -18,6 +18,7 @@ description:        Parse Graphviz xdot files and interactively view them using
                     For an example of using this library try the accompanying
                     @Demo.hs@ with the dot-files in @dot-examples/@.
 
+tested-with: GHC == 7.4.1, GHC == 7.4.2
 Extra-source-files: Demo.hs, dot-examples/*.dot
 Library
   Exposed-modules: Graphics.XDot.Parser Graphics.XDot.Viewer Graphics.XDot.Types
