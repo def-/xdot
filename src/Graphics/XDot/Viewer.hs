@@ -56,22 +56,34 @@ drawAll hover (_,_,sw,sh) ops = do
 
 stylizedDraw :: Eq t => Bool -> Object t -> Object t -> Render a -> DrawState ()
 stylizedDraw filled mn hover renderOps = do
-  (r,g,b,a) <- getCorrectColor filled
+  (rf,gf,bf,af) <- gets filledColor
+  (rs,gs,bs,as) <- gets strokeColor
   lWidth <- gets lineWidth
   lStyle <- gets lineStyle
 
   lift $ do
-    if mn /= None && mn == hover
-      then if filled then setSourceRGBA 1 0 0 0.3 else setSourceRGBA 1 0 0 1
-      else setSourceRGBA r g b a
-    setLineWidth lWidth
-    setDash lStyle 0
+    when filled $ do
+      if mn /= None && mn == hover
+        then setSourceRGBA 1 0.8 0.8 1
+        else setSourceRGBA rf gf bf af
+      setLineWidth lWidth
+      setDash lStyle 0
+
+      save
+      renderOps
+      restore
+
+      fillPreserve
+      fill
 
     save
     renderOps
     restore
 
-    if filled then fillPreserve >> fill else stroke
+    if mn /= None && mn == hover
+      then setSourceRGBA 1 0 0 1
+      else setSourceRGBA rs gs bs as
+    stroke
 
 draw :: Eq t => Object t -> (Object t, Operation) -> DrawState [(Object t, Rectangle)]
 draw hover (mn, Ellipse (x,y) w h filled) = do
@@ -196,6 +208,3 @@ draw _ (_, Style x) = do
   return []
 
 draw _ (_, Image{}) = return [] -- TODO
-
-getCorrectColor :: Bool -> DrawState RGBA
-getCorrectColor filled = gets $ if filled then filledColor else strokeColor
