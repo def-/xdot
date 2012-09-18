@@ -123,8 +123,8 @@ draw hover (mn, BSpline ((x,y):xys) filled) = do
 
   return $ case mn of
     None -> []
-    o -> [ (o, (x  - 10, y  + 10, 20, 20))
-         , (o, (xe - 10, ye + 10, 20, 20))
+    o -> [ (o, (x  - 15, y  + 15, 30, 30))
+         , (o, (xe - 15, ye + 15, 30, 30))
          ]
 
   where drawBezier ((x1,y1):(x2,y2):(x3,y3):xys2) = do
