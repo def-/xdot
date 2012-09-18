@@ -17,6 +17,10 @@ description:        Parse Graphviz xdot files and interactively view them using
                     .
                     For an example of using this library try the accompanying
                     @Demo.hs@ with the dot-files in @dot-examples/@.
+                    .
+                    This library was originally written as part of ghc-vis, but
+                    is now a seperate project, in case anyone else may have a
+                    use for it.
 
 tested-with: GHC == 7.4.1, GHC == 7.4.2
 Extra-source-files: Demo.hs, dot-examples/*.dot
