@@ -36,3 +36,7 @@ Library
                  polyparse
   Hs-source-dirs: src/
   Ghc-options: -Wall -fno-warn-unused-do-bind
+
+source-repository head
+    type:     git
+    location: git://r0q.ath.cx/xdot
