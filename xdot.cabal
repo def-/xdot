@@ -22,7 +22,7 @@ description:        Parse Graphviz xdot files and interactively view them using
                     is now a seperate project, in case anyone else may have a
                     use for it.
 
-tested-with: GHC == 7.4.1, GHC == 7.4.2
+tested-with: GHC == 7.4.1, GHC == 7.4.2, GHC == 7.6.1
 Extra-source-files: Demo.hs, dot-examples/*.dot
 Library
   Exposed-modules: Graphics.XDot.Parser Graphics.XDot.Viewer Graphics.XDot.Types
