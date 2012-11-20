@@ -8,6 +8,7 @@ import qualified Data.Text.Lazy.IO as L
 
 import Data.GraphViz
 import qualified Data.GraphViz.Types.Generalised as G
+import qualified Data.GraphViz.Types.Graph as R
 import Data.GraphViz.Commands.IO
 
 import Graphics.XDot.Parser
@@ -34,7 +35,8 @@ main = do
 run :: String -> IO ()
 run file = do
   dotText <- L.readFile file
-  let dg = parseDotGraph dotText :: G.DotGraph String
+  -- If dg is a G.DotGraph it fails when there's a subgraph in it
+  let dg = parseDotGraph dotText :: R.DotGraph String
 
   -- You can choose another graphviz command by changing Dot to Neato, TwoPi, Circo or Fdp
   xdg <- graphvizWithHandle Dot dg XDot hGetDot
@@ -72,7 +74,7 @@ run file = do
   onDestroy window mainQuit
   mainGUI
 
-click :: IORef State -> G.DotGraph String -> IO ()
+click :: IORef State -> R.DotGraph String -> IO ()
 click state _dg = do
   s <- readIORef state
 

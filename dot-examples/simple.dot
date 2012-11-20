@@ -1,0 +1,7 @@
+digraph graphname
+{
+  subgraph G0{
+      a -> b -> c;
+      b -> d;
+  }
+}
