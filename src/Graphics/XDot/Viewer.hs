@@ -114,7 +114,19 @@ draw hover (mn, Polygon ((x,y):xys) filled) = do
 
 draw _ (_, Polygon [] _) = return []
 
-draw _ (_, Polyline _) = return []
+draw hover (mn, Polyline ((x,y):xys)) = do
+  stylizedDraw False hover mn $ do
+    moveTo x y
+    mapM_ (uncurry lineTo) xys
+
+  let xs = x : map fst xys
+  let ys = y : map snd xys
+
+  return $ case mn of
+    None -> []
+    o -> [(o, (minimum xs, maximum ys, maximum xs - minimum xs, maximum ys - minimum ys))]
+
+draw _ (_, Polyline [] _) = return []
 
 draw hover (mn, BSpline ((x,y):xys) filled) = do
   stylizedDraw filled hover mn $ do
