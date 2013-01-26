@@ -126,7 +126,7 @@ draw hover (mn, Polyline ((x,y):xys)) = do
     None -> []
     o -> [(o, (minimum xs, maximum ys, maximum xs - minimum xs, maximum ys - minimum ys))]
 
-draw _ (_, Polyline [] _) = return []
+draw _ (_, Polyline []) = return []
 
 draw hover (mn, BSpline ((x,y):xys) filled) = do
   stylizedDraw filled hover mn $ do
