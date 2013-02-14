@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, NamedFieldPuns #-}
 
 {- |
    Module      : Graphics.XDot.Parser
@@ -58,7 +58,9 @@
    > import qualified Data.GraphViz.Types.Generalised as G
  -}
 module Graphics.XDot.Parser (
+  --test,
   getOperations,
+  getDimensions,
   getSize
 )
 where
@@ -79,6 +81,10 @@ import qualified Data.GraphViz.Attributes.Complete as A
 import qualified Data.GraphViz.Types.Generalised as G
 
 import Graphics.XDot.Types hiding (w, h, filled, baseline, width, alignment, size, text, xy, name)
+
+--import qualified Data.Text.Lazy.IO as L
+--import Data.GraphViz.Commands.IO
+--import Data.GraphViz (GraphvizCommand(Dot), GraphvizOutput(XDot), graphvizWithHandle)
 
 -- | Extract all operations of an xdot graph and connect them to the node they
 --   belong to, if any.
@@ -102,6 +108,42 @@ getOperations (G.DotGraph _ _ _ graphStatements) = F.foldr handle [] graphStatem
         handleSecond (A.UnknownAttribute "_hldraw_" r) l = parse r ++ l
         handleSecond (A.UnknownAttribute "_tlldraw_" r) l = parse r ++ l
         handleSecond _ l = l
+
+-- | Extract the dimensions of all nodes and edges in the graph.
+getDimensions :: G.DotGraph a -> [(Object a, Rectangle)]
+getDimensions (G.DotGraph _ _ _ graphStatements) = F.foldr handle [] graphStatements
+  where handle (G.DN (DotNode ident attrs)) l = (Node ident, (x - w / 2, y - h / 2, w, h)) : l
+          where (x,y) = foldr getPos (0,0) attrs
+                w     = 72 * foldr getWidth 0 attrs
+                h     = 72 * foldr getHeight 0 attrs
+
+        handle (G.DE (DotEdge from to attrs)) l = zip (repeat (Edge from to)) (map (\(x,y) -> (x - w / 2, y - h / 2, w, h)) xys) ++ l
+          where xys = foldr getEdgePos [] attrs
+                w   = 30
+                h   = 30
+        handle _ l = l
+
+        getEdgePos (A.Pos (A.SplinePos splines)) l = foldr getSplinePos [] splines ++ l
+        getEdgePos _ l = l
+
+        getSplinePos (A.Spline {A.splinePoints = ((A.Point xStart yStart _ _):_), A.endPoint = Just (A.Point xEnd yEnd _ _)}) l = (xStart, yStart) : (xEnd, yEnd) : l
+        getSplinePos _ l = l
+
+        getWidth (A.Width w) _ = w
+        getWidth _ l = l
+
+        getHeight (A.Height h) _ = h
+        getHeight _ l = l
+
+        getPos (A.Pos (A.PointPos (A.Point x y _ _))) _ = (x,y)
+        getPos _ l = l
+
+--test = do
+--    dotText <- L.readFile "/tmp/foo.dot"
+--    let dotGraph = parseDotGraph dotText :: G.DotGraph String
+--    xDotGraph <- graphvizWithHandle Dot dotGraph XDot hGetDot :: IO (G.DotGraph String)
+--    putStrLn $ show $ xDotGraph
+--    putStrLn $ show $ getDimensions xDotGraph
 
 -- | Extract the dimensions of the graph when drawn.
 getSize :: G.DotGraph a -> Rectangle

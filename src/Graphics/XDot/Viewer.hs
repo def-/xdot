@@ -99,14 +99,14 @@ draw hover (mn, Ellipse (x,y) w h filled) = do
     None -> []
     o -> [(o, (x - w, y + h, 2 * w, 2 * h))]
 
-draw hover (mn, Polygon ((x,y):xys) filled) = do
+draw hover (mn, Polygon a@((x,y):xys) filled) = do
   stylizedDraw filled hover mn $ do
     moveTo x y
     mapM_ (uncurry lineTo) xys
     closePath
 
-  let xs = x : map fst xys
-  let ys = y : map snd xys
+  let xs = x : map fst a
+  let ys = y : map snd a
 
   return $ case mn of
     None -> []
@@ -114,13 +114,13 @@ draw hover (mn, Polygon ((x,y):xys) filled) = do
 
 draw _ (_, Polygon [] _) = return []
 
-draw hover (mn, Polyline ((x,y):xys)) = do
+draw hover (mn, Polyline a@((x,y):xys)) = do
   stylizedDraw False hover mn $ do
     moveTo x y
     mapM_ (uncurry lineTo) xys
 
-  let xs = x : map fst xys
-  let ys = y : map snd xys
+  let xs = x : map fst a
+  let ys = y : map snd a
 
   return $ case mn of
     None -> []
@@ -128,10 +128,13 @@ draw hover (mn, Polyline ((x,y):xys)) = do
 
 draw _ (_, Polyline []) = return []
 
-draw hover (mn, BSpline ((x,y):xys) filled) = do
+draw hover (mn, BSpline a@((x,y):xys) filled) = do
   stylizedDraw filled hover mn $ do
     moveTo x y
     drawBezier xys
+
+  let xs = x : map fst a
+  let ys = y : map snd a
 
   return $ case mn of
     None -> []
