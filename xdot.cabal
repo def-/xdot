@@ -29,11 +29,11 @@ Library
   Default-Language: Haskell2010
   Build-depends: base == 4.*,
                  mtl >= 2.0,
-                 cairo,
-                 gtk,
-                 graphviz >= 2999.14.1.0,
-                 text,
-                 polyparse
+                 cairo == 0.12.*,
+                 gtk == 0.12.*,
+                 graphviz == 2999.16.*,
+                 text == 0.11.*,
+                 polyparse == 1.8.*
   Hs-source-dirs: src/
   Ghc-options: -Wall -fno-warn-unused-do-bind
 
