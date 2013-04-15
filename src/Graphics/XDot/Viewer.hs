@@ -35,10 +35,11 @@ type DrawState a = MS.StateT DState Render a
 -- | Draw an xdot graph, possibly highlighting a node.
 drawAll :: Eq t => 
      Object t -- ^ id of the node to highlight
+  -> [Object t] -- ^ id of the node to highlight
   -> Rectangle -- ^ dimensions of the graph, as returned by 'Graphics.XDot.Parser.getSize'
   -> [(Object t, Operation)] -- ^ operations, as returned by 'Graphics.XDot.Parser.getOperations'
   -> Render [(Object t, Rectangle)] -- ^ dimensions of the rendered nodes on the screen
-drawAll hover (_,_,sw,sh) ops = do
+drawAll hover hidden (_,_,sw,sh) ops = do
   let scalex = 1
       scaley = -1
       offsetx = -0.5 * sw
@@ -47,15 +48,15 @@ drawAll hover (_,_,sw,sh) ops = do
   translate offsetx offsety
   scale scalex scaley
 
-  boundingBoxes <- evalStateT (mapM (draw hover) ops) $ DState "" 1 1 [] (1,1,1,1) (0,0,0,1)
+  boundingBoxes <- evalStateT (mapM (draw hover hidden) ops) $ DState "" 1 1 [] (1,1,1,1) (0,0,0,1)
 
   restore
   return
     $ map (\(o, (x,y,w,h)) -> (o, (x*scalex+offsetx,y*scaley+offsety,w,h)))
     $ concat boundingBoxes
 
-stylizedDraw :: Eq t => Bool -> Object t -> Object t -> Render a -> DrawState ()
-stylizedDraw filled mn hover renderOps = do
+stylizedDraw :: Eq t => Bool -> Object t -> Object t -> [Object t] -> Render a -> DrawState ()
+stylizedDraw filled hover mn hidden renderOps = do
   (rf,gf,bf,af) <- gets filledColor
   (rs,gs,bs,as) <- gets strokeColor
   lWidth <- gets lineWidth
@@ -63,9 +64,11 @@ stylizedDraw filled mn hover renderOps = do
 
   lift $ do
     when filled $ do
-      if mn /= None && mn == hover
-        then setSourceRGBA 1 0.8 0.8 1
-        else setSourceRGBA rf gf bf af
+      if mn `elem` hidden
+        then setSourceRGBA rf gf bf 0
+        else if mn /= None && mn == hover
+          then setSourceRGBA 1 0.8 0.8 1
+          else setSourceRGBA rf gf bf af
 
       save
       renderOps
@@ -77,9 +80,11 @@ stylizedDraw filled mn hover renderOps = do
     setLineWidth lWidth
     setDash lStyle 0
 
-    if mn /= None && mn == hover
-      then setSourceRGBA 1 0 0 1
-      else setSourceRGBA rs gs bs as
+    if mn `elem` hidden
+      then setSourceRGBA rs gs bs 0
+      else if mn /= None && mn == hover
+        then setSourceRGBA 1 0 0 1
+        else setSourceRGBA rs gs bs as
 
     save
     renderOps
@@ -87,9 +92,9 @@ stylizedDraw filled mn hover renderOps = do
 
     stroke
 
-draw :: Eq t => Object t -> (Object t, Operation) -> DrawState [(Object t, Rectangle)]
-draw hover (mn, Ellipse (x,y) w h filled) = do
-  stylizedDraw filled hover mn $ do
+draw :: Eq t => Object t -> [Object t] -> (Object t, Operation) -> DrawState [(Object t, Rectangle)]
+draw hover hidden (mn, Ellipse (x,y) w h filled) = do
+  stylizedDraw filled hover mn hidden $ do
     translate x y
     scale w h
     moveTo 1 0
@@ -99,8 +104,8 @@ draw hover (mn, Ellipse (x,y) w h filled) = do
     None -> []
     o -> [(o, (x - w, y + h, 2 * w, 2 * h))]
 
-draw hover (mn, Polygon a@((x,y):xys) filled) = do
-  stylizedDraw filled hover mn $ do
+draw hover hidden (mn, Polygon a@((x,y):xys) filled) = do
+  stylizedDraw filled hover mn hidden $ do
     moveTo x y
     mapM_ (uncurry lineTo) xys
     closePath
@@ -112,10 +117,10 @@ draw hover (mn, Polygon a@((x,y):xys) filled) = do
     None -> []
     o -> [(o, (minimum xs, maximum ys, maximum xs - minimum xs, maximum ys - minimum ys))]
 
-draw _ (_, Polygon [] _) = return []
+draw _ hidden (_, Polygon [] _) = return []
 
-draw hover (mn, Polyline a@((x,y):xys)) = do
-  stylizedDraw False hover mn $ do
+draw hover hidden (mn, Polyline a@((x,y):xys)) = do
+  stylizedDraw False hover mn hidden $ do
     moveTo x y
     mapM_ (uncurry lineTo) xys
 
@@ -126,10 +131,10 @@ draw hover (mn, Polyline a@((x,y):xys)) = do
     None -> []
     o -> [(o, (minimum xs, maximum ys, maximum xs - minimum xs, maximum ys - minimum ys))]
 
-draw _ (_, Polyline []) = return []
+draw _ hidden (_, Polyline []) = return []
 
-draw hover (mn, BSpline a@((x,y):xys) filled) = do
-  stylizedDraw filled hover mn $ do
+draw hover hidden (mn, BSpline a@((x,y):xys) filled) = do
+  stylizedDraw filled hover mn hidden $ do
     moveTo x y
     drawBezier xys
 
@@ -148,9 +153,9 @@ draw hover (mn, BSpline a@((x,y):xys) filled) = do
         drawBezier _ = return ()
         (xe,ye) = last xys
 
-draw _ (_, BSpline [] _) = return []
+draw _ hidden (_, BSpline [] _) = return []
 
-draw hover (mn, Text (x,y) alignment w text) = do
+draw hover hidden (mn, Text (x,y) alignment w text) = do
   fontName' <- gets fontName
   fontSize' <- gets fontSize
 
@@ -191,7 +196,7 @@ draw hover (mn, Text (x,y) alignment w text) = do
              RightAlign  -> x -       w3
       y3 = y + h3 - descent
 
-  stylizedDraw False hover mn $ do
+  stylizedDraw False hover mn hidden $ do
     moveTo x3 y3
     scale f (-f)
     showLayout layout
@@ -200,13 +205,13 @@ draw hover (mn, Text (x,y) alignment w text) = do
     None -> []
     o -> [(o, (x3, y3, w3, h3))]
 
-draw _ (_, Color color filled) = do
+draw _ _ (_, Color color filled) = do
   modify (\s -> if filled
     then s{filledColor = color}
     else s{strokeColor = color})
   return []
 
-draw _ (_, Font size name) = do
+draw _ _ (_, Font size name) = do
   modify (\s -> s{fontName = fixedName, fontSize = size})
   return []
 
@@ -216,7 +221,7 @@ draw _ (_, Font size name) = do
         fixName '-' = ' '
         fixName x   = x
 
-draw _ (_, Style x) = do
+draw _ _ (_, Style x) = do
   case x of -- TODO: Some styles missing
     "solid"  -> modify (\s -> s{lineStyle = []}) -- always on
     "dashed" -> modify (\s -> s{lineStyle = [6,6]}) -- 6 pts on, 6 pts off
@@ -224,4 +229,4 @@ draw _ (_, Style x) = do
     _ -> return ()
   return []
 
-draw _ (_, Image{}) = return [] -- TODO
+draw _ _ (_, Image{}) = return [] -- TODO
