@@ -7,7 +7,7 @@ cabal-version:      >= 1.10
 build-type:         Simple
 author:             Dennis Felsing <dennis@felsin9.de>
 maintainer:         Dennis Felsing <dennis@felsin9.de>
-copyright:          Dennis Felsing 2012
+copyright:          Dennis Felsing 2012-2013
 synopsis:           Parse Graphviz xdot files and interactively view them using GTK and Cairo
 description:        Parse Graphviz xdot files and interactively view them using
                     GTK and Cairo.
@@ -22,7 +22,7 @@ description:        Parse Graphviz xdot files and interactively view them using
                     is now a seperate project, in case anyone else may have a
                     use for it.
 
-tested-with: GHC == 7.4.1, GHC == 7.4.2, GHC == 7.6.1
+tested-with: GHC == 7.4.1, GHC == 7.4.2, GHC == 7.6.1, GHC == 7.6.2, GHC == 7.6.3
 Extra-source-files: Demo.hs, dot-examples/*.dot
 Library
   Exposed-modules: Graphics.XDot.Parser Graphics.XDot.Viewer Graphics.XDot.Types
