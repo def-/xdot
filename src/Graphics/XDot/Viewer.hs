@@ -128,13 +128,10 @@ draw hover (mn, Polyline a@((x,y):xys)) = do
 
 draw _ (_, Polyline []) = return []
 
-draw hover (mn, BSpline a@((x,y):xys) filled) = do
+draw hover (mn, BSpline ((x,y):xys) filled) = do
   stylizedDraw filled hover mn $ do
     moveTo x y
     drawBezier xys
-
-  let xs = x : map fst a
-  let ys = y : map snd a
 
   return $ case mn of
     None -> []
