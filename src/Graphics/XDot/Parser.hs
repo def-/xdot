@@ -258,7 +258,7 @@ parse = Data.GraphViz.Parsing.runParser' $ P.many $ do
       case n of
         7 -> do
           character ' '
-          return $ Color (r,g,b,255) filled
+          return $ Color (r,g,b,1) filled
         9 -> do
           a <- parseHex
           character ' '
