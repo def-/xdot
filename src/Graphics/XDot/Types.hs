@@ -40,6 +40,7 @@ data Operation = Ellipse { xy :: Point, w :: Double, h :: Double, filled :: Bool
                | Polygon { points :: [Point], filled :: Bool }
                | Polyline { points :: [Point] }
                | BSpline { points :: [Point], filled :: Bool }
+               | FontCharacteristics { bold :: Bool, italic :: Bool, underline :: Bool, superscript :: Bool, subscript :: Bool, strikethrough :: Bool }
                | Text { baseline :: Point, alignment :: Alignment, width :: Double, text :: String }
                | Color { rgba :: (Double, Double, Double, Double), filled :: Bool }
                | Font { size :: Double, name :: String }

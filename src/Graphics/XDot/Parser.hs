@@ -69,6 +69,7 @@ import Control.Monad
 import Data.Maybe
 import Data.Char
 import Data.Ratio
+import Data.Bits
 
 import qualified Data.Foldable as F
 import qualified Data.Text.Lazy as B
@@ -168,6 +169,7 @@ parse = Data.GraphViz.Parsing.runParser' $ P.many $ do
     'L' -> parsePolyline
     'B' -> parseBSpline False
     'b' -> parseBSpline True
+    't' -> parseFontCharacteristics
     'T' -> parseText
     'C' -> parseColor True
     'c' -> parseColor False
@@ -191,6 +193,11 @@ parse = Data.GraphViz.Parsing.runParser' $ P.many $ do
     parseBSpline filled = do
       xs <- parsePoints
       return $ BSpline xs filled
+
+    parseFontCharacteristics = do
+      f <- parseInt'
+      character ' '
+      return $ FontCharacteristics (testBit f 0) (testBit f 1) (testBit f 2) (testBit f 3) (testBit f 4) (testBit f 5)
 
     parseText = do
       baseline <- parsePoint
@@ -241,16 +248,22 @@ parse = Data.GraphViz.Parsing.runParser' $ P.many $ do
       return (x,y)
 
     parseColor filled = do -- TODO: Not complete
-      _ <- parseInt
+      n <- parseInt
       character ' '
       character '-'
       character '#'
       r <- parseHex
       g <- parseHex
       b <- parseHex
-      a <- parseHex
-      character ' '
-      return $ Color (r,g,b,a) filled
+      case n of
+        7 -> do
+          character ' '
+          return $ Color (r,g,b,255) filled
+        9 -> do
+          a <- parseHex
+          character ' '
+          return $ Color (r,g,b,a) filled
+        _ -> fail "Unknown color encoding"
      where parseHex = liftM hexToFloat $ replicateM 2 P.next
            hexToFloat s = foldl (\x y -> 16 * x + fromIntegral (digitToInt y)) 0 s / 255
 

@@ -222,3 +222,5 @@ draw _ (_, Style x) = do
   return []
 
 draw _ (_, Image{}) = return [] -- TODO
+
+draw _ (_, FontCharacteristics{}) = return [] -- TODO
