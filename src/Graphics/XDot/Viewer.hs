@@ -14,8 +14,8 @@ where
 
 import Graphics.XDot.Types hiding (w, h, filled, alignment, text, name, size)
 
-import Graphics.UI.Gtk hiding (Color, Rectangle, descent, Object)
-import Graphics.Rendering.Cairo
+import Graphics.UI.Gtk hiding (Color, Rectangle, descent, Object, draw)
+import Graphics.Rendering.Cairo hiding (x, y)
 
 import Control.Monad.State hiding (State)
 import qualified Control.Monad.State as MS
