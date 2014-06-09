@@ -39,4 +39,4 @@ Library
 
 source-repository head
     type:     git
-    location: git://r0q.ath.cx/xdot
+    location: https://github.com/def-/xdot.git
