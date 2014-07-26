@@ -39,7 +39,7 @@ run file = do
   let dg = parseDotGraph dotText :: R.DotGraph String
 
   -- You can choose another graphviz command by changing Dot to Neato, TwoPi, Circo or Fdp
-  xdg <- graphvizWithHandle Dot dg XDot hGetDot
+  xdg <- graphvizWithHandle Dot dg (XDot Nothing) hGetDot
 
   let objs = (getOperations xdg, getSize xdg)
 
