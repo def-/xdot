@@ -1,5 +1,5 @@
 name:               xdot
-version:            0.2.4.3
+version:            0.2.4.4
 license:            BSD3
 license-file:       LICENSE
 category:           Graphs, Graphics
@@ -29,8 +29,8 @@ Library
   Default-Language: Haskell2010
   Build-depends: base == 4.*,
                  mtl >= 2.0 && < 2.3,
-                 cairo == 0.12.*,
-                 gtk == 0.12.*,
+                 cairo >= 0.12 && < 0.14,
+                 gtk >= 0.12 && < 0.14,
                  graphviz >= 2999.16 && < 2999.18,
                  text >= 0.11 && < 1.2,
                  polyparse >= 1.8 && < 1.10
