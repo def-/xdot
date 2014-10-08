@@ -23,7 +23,7 @@ description:        Parse Graphviz xdot files and interactively view them using
                     use for it.
 
 tested-with: GHC == 7.4.1, GHC == 7.4.2, GHC == 7.6.1, GHC == 7.6.2, GHC == 7.6.3
-Extra-source-files: Demo.hs, dot-examples/*.dot
+Extra-source-files: dot-examples/*.dot
 Library
   Exposed-modules: Graphics.XDot.Parser Graphics.XDot.Viewer Graphics.XDot.Types
   Default-Language: Haskell2010
@@ -36,6 +36,17 @@ Library
                  polyparse >= 1.8 && < 1.10
   Hs-source-dirs: src/
   Ghc-options: -Wall -fno-warn-unused-do-bind
+
+Executable xdot-demo
+  Default-Language: Haskell2010
+  Main-Is: Demo.hs
+  Build-depends: base,
+                 cairo,
+                 graphviz,
+                 gtk,
+                 text,
+                 -- ourselves
+                 xdot
 
 source-repository head
     type:     git
