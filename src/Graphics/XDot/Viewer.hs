@@ -14,7 +14,10 @@ where
 
 import Graphics.XDot.Types hiding (w, h, filled, alignment, text, name, size)
 
-import Graphics.UI.Gtk hiding (Color, Rectangle, descent, Object, draw)
+import Graphics.UI.Gtk (PangoRectangle(..), layoutSetFontDescription,
+  layoutGetExtents, layoutContextChanged, fontDescriptionFromString,
+  fontDescriptionSetSize, showLayout, cairoContextSetFontOptions,
+  cairoContextGetFontOptions, layoutGetContext, createLayout)
 import Graphics.Rendering.Cairo hiding (x, y)
 
 import Control.Monad.State hiding (State)
