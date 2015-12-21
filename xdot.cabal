@@ -22,7 +22,7 @@ description:        Parse Graphviz xdot files and interactively view them using
                     is now a separate project, in case anyone else may have a
                     use for it.
 
-tested-with: GHC == 7.4.1, GHC == 7.4.2, GHC == 7.6.1, GHC == 7.6.2, GHC == 7.6.3, GHC == 7.8.3, GHC == 7.10.1, GHC == 7.10.2
+tested-with: GHC == 7.4.1, GHC == 7.4.2, GHC == 7.6.1, GHC == 7.6.2, GHC == 7.6.3, GHC == 7.8.3, GHC == 7.10.1, GHC == 7.10.2, GHC == 7.10.3
 Extra-source-files: dot-examples/*.dot
 Library
   Exposed-modules: Graphics.XDot.Parser Graphics.XDot.Viewer Graphics.XDot.Types
@@ -30,7 +30,7 @@ Library
   Build-depends: base == 4.*,
                  mtl >= 2.0 && < 2.3,
                  cairo >= 0.12 && < 0.14,
-                 gtk >= 0.12 && < 0.14,
+                 gtk >= 0.12 && < 0.15,
                  graphviz >= 2999.16 && < 2999.19,
                  text >= 0.11 && < 1.3,
                  polyparse >= 1.8 && < 1.12
