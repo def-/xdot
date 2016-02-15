@@ -2,6 +2,7 @@
 
 import System.Environment
 import Control.Monad
+import Control.Monad.Trans.Class
 import Data.IORef
 
 import qualified Data.Text.Lazy.IO as L
@@ -56,22 +57,26 @@ run file = do
              , containerChild := canvas
              ]
 
-  onExpose canvas $ const $ do
+  on canvas draw $ do
     redraw canvas state
-    return True
 
-  onMotionNotify canvas False $ \e -> do
-    modifyIORef state (\s -> s {mousePos = (E.eventX e, E.eventY e)})
-    tick canvas state
-    return True
+  on canvas motionNotifyEvent $ do
+    (x,y) <- eventCoordinates
+    lift $ do
+      modifyIORef state (\s -> s {mousePos = (x,y)})
+      tick canvas state
+      return True
 
-  onButtonPress canvas $ \e -> do
-    when (E.eventButton e == LeftButton && E.eventClick e == SingleClick) $
-      click state dg
-    return True
+  on canvas buttonPressEvent $ do
+    button <- eventButton
+    eClick <- eventClick
+    lift $ do
+        when (button == LeftButton && eClick == SingleClick) $
+          click state dg
+        return True
 
   widgetShowAll window
-  onDestroy window mainQuit
+  on window destroyEvent $ lift $ mainQuit >> return True
   mainGUI
 
 click :: IORef State -> R.DotGraph String -> IO ()
@@ -104,31 +109,27 @@ tick canvas state = do
   s <- readIORef state
   unless (oldHover == hover s) $ widgetQueueDraw canvas
 
-redraw :: WidgetClass w => w -> IORef State -> IO ()
+redraw :: WidgetClass w => w -> IORef State -> Render ()
 redraw canvas state = do
-  s <- readIORef state
-  E.Rectangle _ _ rw rh <- widgetGetAllocation canvas
+  s <- liftIO $ readIORef state
+  rw <- liftIO $ widgetGetAllocatedWidth canvas
+  rh <- liftIO $ widgetGetAllocatedHeight canvas
 
   let (ops, size'@(_,_,sw,sh)) = objects s
 
-  boundingBoxes <- render canvas $ do
-    -- Proportional scaling
-    let scalex = min (fromIntegral rw / sw) (fromIntegral rh / sh)
-        scaley = scalex
-        offsetx = 0.5 * fromIntegral rw
-        offsety = 0.5 * fromIntegral rh
-    save
-    translate offsetx offsety
-    scale scalex scaley
+  -- Proportional scaling
+  let scalex = min (fromIntegral rw / sw) (fromIntegral rh / sh)
+      scaley = scalex
+      offsetx = 0.5 * fromIntegral rw
+      offsety = 0.5 * fromIntegral rh
+  save
+  translate offsetx offsety
+  scale scalex scaley
 
-    result <- drawAll (hover s) size' ops
+  result <- drawAll (hover s) size' ops
 
-    restore
-    return $ map (\(o, (x,y,w,h)) -> (o, (x*scalex+offsetx,y*scaley+offsety,w*scalex,h*scaley))) result
+  restore
 
-  modifyIORef state (\s' -> s' {bounds = boundingBoxes})
+  let boundingBoxes = map (\(o, (x,y,w,h)) -> (o, (x*scalex+offsetx,y*scaley+offsety,w*scalex,h*scaley))) result
 
-render :: WidgetClass w => w -> Render b -> IO b
-render canvas r = do
-    win <- widgetGetDrawWindow canvas
-    renderWithDrawable win r
+  liftIO $ modifyIORef state (\s' -> s' {bounds = boundingBoxes})

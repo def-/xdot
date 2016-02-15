@@ -30,7 +30,7 @@ Library
   Build-depends: base == 4.*,
                  mtl >= 2.0 && < 2.3,
                  cairo >= 0.12 && < 0.14,
-                 gtk >= 0.12 && < 0.15,
+                 gtk3 >= 0.12 && < 0.15,
                  graphviz >= 2999.16 && < 2999.19,
                  text >= 0.11 && < 1.3,
                  polyparse >= 1.8 && < 1.12
@@ -43,8 +43,9 @@ Executable xdot-demo
   Build-depends: base,
                  cairo,
                  graphviz,
-                 gtk,
+                 gtk3,
                  text,
+                 transformers,
                  -- ourselves
                  xdot
 
