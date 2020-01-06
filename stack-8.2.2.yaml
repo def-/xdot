@@ -1,0 +1,10 @@
+resolver: lts-11.22
+packages:
+- '.'
+extra-deps:
+- svgcairo-0.13.2.1
+- graphviz-2999.20.0.3
+- gtk3-0.15.4
+- gio-0.13.8.0
+- wl-pprint-text-1.2.0.0
+- base-compat-0.10.5
