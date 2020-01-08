@@ -20,8 +20,10 @@ import Graphics.UI.Gtk (PangoRectangle(..), layoutSetFontDescription,
   cairoContextGetFontOptions, layoutGetContext, createLayout)
 import Graphics.Rendering.Cairo hiding (x, y)
 
-import Control.Monad.State hiding (State)
-import qualified Control.Monad.State as MS
+import Control.Monad.State.Strict hiding (State)
+import qualified Control.Monad.State.Strict as MS
+
+import Control.DeepSeq
 
 type RGBA = (Double, Double, Double, Double)
 
@@ -36,7 +38,7 @@ data DState = DState
 type DrawState a = MS.StateT DState Render a
 
 -- | Draw an xdot graph, possibly highlighting a node.
-drawAll :: Eq t => 
+drawAll :: (Eq t, NFData t) =>
      Object t -- ^ id of the node to highlight
   -> Rectangle -- ^ dimensions of the graph, as returned by 'Graphics.XDot.Parser.getSize'
   -> [(Object t, Operation)] -- ^ operations, as returned by 'Graphics.XDot.Parser.getOperations'
@@ -50,7 +52,7 @@ drawAll hover (_,_,sw,sh) ops = do
   translate offsetx offsety
   scale scalex scaley
 
-  boundingBoxes <- evalStateT (mapM (draw hover) ops) $ DState "" 1 1 [] (1,1,1,1) (0,0,0,1)
+  boundingBoxes <- evalStateT (mapM (draw hover) $!! ops) $ DState "" 1 1 [] (1,1,1,1) (0,0,0,1)
 
   restore
   return
