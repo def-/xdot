@@ -6,6 +6,7 @@
 
    This module contains various types used to represent xdot parameters.
  -}
+{-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 module Graphics.XDot.Types (
   Point,
   Rectangle,
@@ -14,6 +15,9 @@ module Graphics.XDot.Types (
   Operation(..)
   )
   where
+
+import GHC.Generics (Generic)
+import Control.DeepSeq
 
 -- | A simple point, consisting of an x and y position.
 type Point = (Double, Double)
@@ -25,13 +29,13 @@ type Rectangle = (Double, Double, Double, Double)
 data Alignment = LeftAlign
                | CenterAlign
                | RightAlign
-               deriving Show
+               deriving (Show, Generic, NFData)
 
 -- | An object an operation can belong to.
 data Object n = None
               | Node n
               | Edge n n
-              deriving (Show, Eq)
+              deriving (Show, Eq, Generic, NFData)
 
 -- | Drawing operations supported by xdot. See
 --   <http://www.graphviz.org/doc/info/output.html#d:xdot> for more information
@@ -46,4 +50,4 @@ data Operation = Ellipse { xy :: Point, w :: Double, h :: Double, filled :: Bool
                | Font { size :: Double, name :: String }
                | Style { style :: String } -- TODO: Add type
                | Image { xy :: Point, w :: Double, h :: Double, name :: String }
-               deriving Show
+               deriving (Show, Generic, NFData)
