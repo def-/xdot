@@ -5,8 +5,8 @@ license-file:       LICENSE
 category:           Graphs, Graphics
 cabal-version:      >= 1.18
 build-type:         Simple
-author:             Dennis Felsing <dennis@felsin9.de>
-maintainer:         Dennis Felsing <dennis@felsin9.de>
+author:             Dennis Felsing <dennis@felsing.org>
+maintainer:         Dennis Felsing <dennis@felsing.org>
 copyright:          Dennis Felsing 2012-2019
 synopsis:           Parse Graphviz xdot files and interactively view them using GTK and Cairo
 description:        Parse Graphviz xdot files and interactively view them using

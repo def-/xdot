@@ -2,7 +2,7 @@
    Module      : Graphics.XDot.Viewer
    Copyright   : (c) Dennis Felsing
    License     : 3-Clause BSD-style
-   Maintainer  : dennis@felsin9.de
+   Maintainer  : dennis@felsing.org
 
    This module draws the operations of an xdot graph using Cairo and Pango on a
    Gtk canvas.

@@ -2,7 +2,7 @@
    Module      : Graphics.XDot.Types
    Copyright   : (c) Dennis Felsing
    License     : 3-Clause BSD-style
-   Maintainer  : dennis@felsin9.de
+   Maintainer  : dennis@felsing.org
 
    This module contains various types used to represent xdot parameters.
  -}

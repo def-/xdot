@@ -4,7 +4,7 @@
    Module      : Graphics.XDot.Parser
    Copyright   : (c) Dennis Felsing
    License     : 3-Clause BSD-style
-   Maintainer  : dennis@felsin9.de
+   Maintainer  : dennis@felsing.org
 
    After an xdot file has been opened using GraphViz, its drawing operations
    can be parsed using this module.
