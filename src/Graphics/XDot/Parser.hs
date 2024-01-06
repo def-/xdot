@@ -295,7 +295,7 @@ parse = Data.GraphViz.Parsing.runParser' $ P.many $ do
                     let frac' = fromMaybe "" frac
                         expn' = fromMaybe 0 expn
                     ( return . fromRational . (* (10^^(expn' - fromIntegral (B.length frac'))))
-                      . (%1) . Data.GraphViz.Parsing.runParser' parseInt) (ds `B.append` frac')
+                      . (% 1) . Data.GraphViz.Parsing.runParser' parseInt) (ds `B.append` frac')
                  `P.onFail`
                  fail "Expected a floating point number"
       where
