@@ -20,7 +20,8 @@ import Graphics.UI.Gtk (PangoRectangle(..), layoutSetFontDescription,
   layoutGetContext, createLayout)
 import Graphics.Rendering.Cairo hiding (x, y)
 
-import Control.Monad.State.Strict hiding (State)
+import Control.Monad
+import Control.Monad.State.Strict (evalStateT, modify, gets, lift)
 import qualified Control.Monad.State.Strict as MS
 
 import Control.DeepSeq
